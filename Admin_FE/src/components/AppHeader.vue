@@ -47,6 +47,12 @@ export default {
       console.log(userRole);
       localStorage.setItem('roles', JSON.stringify(userRole));
     } catch (error) {
+      if (error.status === 401) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        isLoggedIn.value = false;
+        this.$router.push('/login');
+      }
       console.error('Failed to fetch user info:', error);
     }
   },

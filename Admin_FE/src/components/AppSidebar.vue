@@ -75,7 +75,6 @@ export default {
             route: "/shipper-management",
           },
           { key: "14", label: "Danh sách khách hàng", route: "/customer" },
-          { key: "15", label: "Quản lý luồng đặt hàng", route: "/flow-management" },
         ],
         Employee: [
           { key: "9", label: "Quản lý dự án", route: "/project-management" },
@@ -130,6 +129,8 @@ export default {
           label: "Quản lý chi tiết thuộc tính tài nguyên",
           route: "/resource-property-details",
         },
+        { key: "17", label: "Quản lý luồng đặt hàng", route: "/flow-management" },
+
       ]
     },
     otherMenuItems() {

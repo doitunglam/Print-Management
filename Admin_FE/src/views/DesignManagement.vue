@@ -15,6 +15,8 @@
     >
       <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
+          <a @click="approveDesign(record.id)">Phê duyệt</a>
+          <a-divider type="vertical" />
           <a @click="showEditModal(record)">Sửa</a>
           <a-divider type="vertical" />
           <a-popconfirm
