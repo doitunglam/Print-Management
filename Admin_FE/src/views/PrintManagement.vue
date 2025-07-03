@@ -6,7 +6,8 @@
     </a-breadcrumb>
 
     <!-- Đặt hai nút trên cùng một dòng với chiều dài bằng nhau -->
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;" v-if="checkPermission('Project') > 0">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;"
+      v-if="checkPermission('Project') > 0">
       <a-button type="primary" @click="showModal" style="flex: 1; margin-right: 10px;">
         Xác nhận thiết kế cho công việc in
       </a-button>
@@ -16,57 +17,56 @@
     </div>
 
     <!-- Bảng công việc in -->
-    <a-table
-      :dataSource="printJobs"
-      :columns="columns"
-      :pagination="{ pageSize: 10 }"
-      rowKey="id"
-      class="design-table"
-    >
-    <template #bodyCell="{ column, record }">
+    <a-table :dataSource="printJobs" :columns="columns" :pagination="{ pageSize: 10 }" rowKey="id" class="design-table">
+      <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
           <div v-if="checkPermission('Project') > 0">
             <a @click="showEditModal(record)">Sửa</a>
             <a-divider type="vertical" />
-            <a-popconfirm
-            title="Bạn có chắc chắn muốn xóa công việc in này không?"
-            ok-text="Có"
-            cancel-text="Không"
-            @confirm="handleDelete(record.id)"
-            >
-            <a>Xóa</a>
-          </a-popconfirm>
-        </div>
+            <a-popconfirm title="Bạn có chắc chắn muốn xóa công việc in này không?" ok-text="Có" cancel-text="Không"
+              @confirm="handleDelete(record.id)">
+              <a>Xóa</a>
+            </a-popconfirm>
+          </div>
+        </span>
+        <span v-else-if="column.key == 'projectId'">
+          {{projects.find((project) => project.id == designs.findLast(design => design.id ==
+            record.designId)?.projectId)?.projectName}}
+        </span>
+        <span v-else-if="column.key == 'designImage'">
+          <img :src="designs.findLast(design => design.id ==
+            record.designId)?.filePath" alt="" class="design-image" />
         </span>
         <span v-else>{{ record[column.dataIndex] || '-' }}</span>
       </template>
-  </a-table>
+    </a-table>
 
     <!-- Modal xác nhận thiết kế -->
-    <a-modal
-      v-model:visible="isModalVisible"
-      title="Xác nhận thiết kế cho công việc in"
-      @ok="handleConfirm"
-      @cancel="handleCancel"
-    >
+    <a-modal v-model:visible="isModalVisible" title="Xác nhận thiết kế cho công việc in" @ok="handleConfirm"
+      @cancel="handleCancel">
       <a-form :model="formData" ref="designForm" layout="vertical">
-        <a-form-item label="ID Thiết kế" name="designId" style="margin-bottom: 10px;">
-          <a-select v-model:value="formData.designId" placeholder="Chọn ID Thiết kế" required>
-            <a-select-option v-for="design in designs" :key="design.id" :value="design.id">
-              ID Thiết kế: {{ design.id }} - ID Dự án: {{ design.projectId }}
+        <a-form-item label="Dự án in" name="projectId" style="margin-bottom: 10px;">
+          <a-select v-model:value="formData.projectId" placeholder="Chọn dự án thiết kế" required>
+            <a-select-option v-for="project in projects" :key="project.id" :value="project.id">
+              {{ project.projectName }}
             </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="Thiết kế" name="designId" style="margin-bottom: 10px;">
+          <a-select v-model:value="formData.designId" placeholder="Chọn Thiết kế" required>\
+            <template v-for="design in designs">
+              <a-select-option v-if="design.projectId == formData.projectId" :key="design.id" :value="design.id">
+                ID Thiết kế: {{ design.id }}
+              </a-select-option>
+            </template>
           </a-select>
         </a-form-item>
       </a-form>
     </a-modal>
 
     <!-- Modal hoàn thành công việc in -->
-    <a-modal
-      v-model:visible="isFinishModalVisible"
-      title="Hoàn thành công việc in và kết thúc dự án"
-      @ok="handleFinishOk"
-      @cancel="handleFinishCancel"
-    >
+    <a-modal v-model:visible="isFinishModalVisible" title="Hoàn thành công việc in và kết thúc dự án"
+      @ok="handleFinishOk" @cancel="handleFinishCancel">
       <a-form :model="finishFormData" ref="finishForm" layout="vertical">
         <p>Bạn có chắc muốn hoàn thành công việc in và kết thúc dự án trên không?</p>
 
@@ -90,32 +90,29 @@
       </a-form>
     </a-modal>
 
-    <a-modal
-  v-model:visible="isEditPrintJobModalVisible"
-  title="Sửa Công Việc In"
-  @ok="handlePrintJobUpdate"
-  @cancel="handleCancelPrintJobEdit"
->
-  <a-form :model="editPrintJob" ref="editPrintJobForm" layout="vertical">
-    <!-- Thiết kế -->
-    <a-form-item label="Thiết kế" name="designId" style="margin-bottom: 10px;">
-      <a-select v-model:value="editPrintJob.designId" placeholder="Chọn thiết kế" required>
-        <a-select-option v-for="design in designs" :key="design.id" :value="design.id">
-          ID Thiết kế: {{ design.id }} - ID Dự án: {{ design.projectId }}
-        </a-select-option>
-      </a-select>
-    </a-form-item>
+    <a-modal v-model:visible="isEditPrintJobModalVisible" title="Sửa Công Việc In" @ok="handlePrintJobUpdate"
+      @cancel="handleCancelPrintJobEdit">
+      <a-form :model="editPrintJob" ref="editPrintJobForm" layout="vertical">
+        <!-- Thiết kế -->
+        <a-form-item label="Thiết kế" name="designId" style="margin-bottom: 10px;">
+          <a-select v-model:value="editPrintJob.designId" placeholder="Chọn thiết kế" required>
+            <a-select-option v-for="design in designs" :key="design.id" :value="design.id">
+              ID Thiết kế: {{ design.id }} - Dự án: {{projects.findLast(project => project.id ===
+                design.projectId)?.projectName}}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
 
-    <!-- Trạng thái công việc in -->
-    <!-- <a-form-item label="Trạng Thái Công Việc In" name="printJobStatus" style="margin-bottom: 10px;">
+        <!-- Trạng thái công việc in -->
+        <!-- <a-form-item label="Trạng Thái Công Việc In" name="printJobStatus" style="margin-bottom: 10px;">
       <a-select v-model:value="editPrintJob.printJobStatus" placeholder="Chọn trạng thái công việc in" required>
         <a-select-option v-for="status in printJobStatuses" :key="status.value" :value="status.value">
           {{ status.label }}
         </a-select-option>
       </a-select>
     </a-form-item> -->
-  </a-form>
-</a-modal>
+      </a-form>
+    </a-modal>
 
   </div>
 </template>
@@ -145,8 +142,8 @@ export default {
       designs: [],
       projects: [],
       columns: [
-        { title: 'ID', dataIndex: 'id', key: 'id' },
-        { title: 'ID Thiết kế', dataIndex: 'designId', key: 'designId' },
+        { title: 'Dự án', dataIndex: 'projectId', key: 'projectId' },
+        { title: 'Mẫu thiết kế', dataIndex: 'designImage', key: 'designImage' },
         { title: 'Trạng thái công việc in', dataIndex: 'printJobStatus', key: 'printJobStatus' },
         { title: 'Hành động', key: 'actions', scopedSlots: { customRender: 'actions' } },
       ],
@@ -274,4 +271,9 @@ export default {
   },
 };
 </script>
-
+<style scoped>
+.design-image {
+  height: 100px;
+  width: auto;
+}
+</style>

@@ -24,7 +24,7 @@
         <span v-else-if="column.key === 'employeeName'">
           {{users.findLast(user => user.id == record.employeeId)?.fullName ?? '-'}}
         </span>
-                <span v-else-if="column.key === 'customerName'">
+        <span v-else-if="column.key === 'customerName'">
           {{customers.findLast(customer => customer.id == record.customerId)?.fullName ?? '-'}}
         </span>
         <span v-else>{{ record[column.dataIndex] || '-' }}</span>
@@ -49,7 +49,8 @@
             <a-select-option v-for="user in usersFiltered" :key="user.id" :value="user.id">
               {{ user.id }} - {{ user.fullName }}
             </a-select-option>
-          </a-select> </a-form-item>
+          </a-select> 
+        </a-form-item>
         <a-form-item label="Khách hàng" name="customerId" style="margin-bottom: 10px;">
           <a-select v-model:value="formData.customerId" placeholder="Chọn một khách hàng" required>
             <a-select-option v-for="customer in customers" :key="customer.id" :value="customer.id">

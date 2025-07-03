@@ -11,8 +11,8 @@
       <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
           <div v-if="checkPermission('Design') > 0">
-            <a @click="approveDesign(record.id)">Phê duyệt</a>
-            <a-divider type="vertical" />
+            <a @click="approveDesign(record.id)" v-if="record.designStatus != 'Approved'">Phê duyệt</a>
+            <a-divider type="vertical" v-if="record.designStatus != 'Approved'" />
             <a @click="showEditModal(record)">Sửa</a>
             <a-divider type="vertical" />
             <a-popconfirm title="Bạn có chắc chắn muốn xóa thiết kế này không?" ok-text="Có" cancel-text="Không"
@@ -23,6 +23,15 @@
         </span>
         <span v-else-if="column.key === 'filePath'">
           <img :src="record.filePath" alt="" class="design-image" />
+        </span>
+        <span v-else-if="column.key === 'projectId'">
+          {{projects.findLast(project => project.id == record.projectId)?.projectName ?? '-'}}
+        </span>
+        <span v-else-if="column.key === 'designerId'">
+          {{users.findLast(user => user.id == record.designerId)?.fullName ?? '-'}}
+        </span>
+        <span v-else-if="column.key === 'approverId'">
+          {{users.findLast(user => user.id == record.approverId)?.fullName ?? '-'}}
         </span>
         <span v-else>{{ record[column.dataIndex] || "-" }}</span>
       </template>
@@ -38,8 +47,12 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="ID Nhà thiết kế" name="designerId" style="margin-bottom: 10px">
-          <a-input v-model:value="newDesign.designerId" placeholder="Nhập ID nhà thiết kế" required />
+        <a-form-item label="Nhà thiết kế" name="designerId" style="margin-bottom: 10px">
+          <a-select v-model:value="newDesign.designerId" placeholder="Chọn nhà thiết kế" required>
+            <a-select-option v-for="user in usersFiltered" :key="user.id" :value="user.id">
+              {{ user.id }} - {{ user.fullName }}
+            </a-select-option>
+          </a-select> 
         </a-form-item>
         <a-form-item label="Tệp Thiết kế" name="filePath" style="margin-bottom: 10px">
           <a-upload :before-upload="handleFileUpload" :show-upload-list="false">
@@ -60,7 +73,11 @@
           </a-select>
         </a-form-item>
         <a-form-item label="ID Nhà thiết kế" name="designerId" style="margin-bottom: 10px">
-          <a-input v-model:value="editDesign.designerId" placeholder="Nhập ID nhà thiết kế" required />
+          <a-select v-model:value="editDesign.designerId" placeholder="Chọn nhà thiết kế" required>
+            <a-select-option v-for="user in usersFiltered" :key="user.id" :value="user.id">
+              {{ user.id }} - {{ user.fullName }}
+            </a-select-option>
+          </a-select>           
         </a-form-item>
         <a-form-item label="Tệp Thiết kế" name="filePath" style="margin-bottom: 10px">
           <a-upload :before-upload="handleFileUpload" :show-upload-list="false">
@@ -83,6 +100,7 @@ import {
 import { getAllProjects } from "@/apis/projectApi"
 import { checkPermission } from '@/utils/index'
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { getAllUsersFromAllUsersApi } from '@/apis/userApi';
 import { storage } from "@/firebaseConfig"
 import { message } from "ant-design-vue"
 
@@ -92,6 +110,8 @@ export default {
     return {
       designs: [],
       projects: [],
+      users: [],
+      usersFiltered: [],
       newDesign: {
         projectId: null,
         designerId: "",
@@ -104,12 +124,17 @@ export default {
       },
       columns: [
         {
-          title: "ID Dự án",
+          title: "Mã thiết kế",
+          dataIndex: "id",
+          key: "id",
+        },
+        {
+          title: "Dự án",
           dataIndex: "projectId",
           key: "projectId",
         },
         {
-          title: "ID Nhà thiết kế",
+          title: "Nhà thiết kế",
           dataIndex: "designerId",
           key: "designerId",
         },
@@ -129,14 +154,9 @@ export default {
           key: "designStatus",
         },
         {
-          title: "ID Người phê duyệt",
+          title: "Người phê duyệt",
           dataIndex: "approverId",
           key: "approverId",
-        },
-        {
-          title: "ID Thiết kế",
-          dataIndex: "id",
-          key: "id",
         },
         {
           title: "Hành động",
@@ -183,19 +203,23 @@ export default {
     },
     async submitDesign() {
       try {
-        console.log("Submitting design:", this.newDesign)
         await addDesign(this.newDesign)
         this.fetchDesigns()
+        this.isModalVisible = false
+        message.success("Thiết kế đã được tạo thành công!")
       } catch (error) {
         console.error("Lỗi khi thêm thiết kế:", error)
+        message.error("Có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu")
       }
     },
     async approveDesign(designId) {
       try {
         await approveDesign(designId)
         this.fetchDesigns()
+        message.success("Phê duyệt thiết kế thành công")
       } catch (error) {
         console.error("Lỗi khi chấp nhận thiết kế:", error)
+        message.error("Lỗi khi phê duyệt thiết kế")
       }
     },
     showCreateModal() {
@@ -238,10 +262,20 @@ export default {
     checkPermission(page) {
       return checkPermission(page)
     },
+    async fetchUsers() {
+      try {
+        const data = await getAllUsersFromAllUsersApi();
+        this.users = data;
+        this.usersFiltered = data.filter(t => t.roles.includes("Employee"))
+      } catch (error) {
+        message.error(error.message || 'Có lỗi xảy ra khi tải danh sách người dùng!');
+      }
+    },
   },
   mounted() {
     this.fetchDesigns()
     this.fetchProjects()
+    this.fetchUsers()
   },
 }
 </script>

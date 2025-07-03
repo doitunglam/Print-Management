@@ -5,68 +5,56 @@
       <a-breadcrumb-item>Quản lý chi tiết thuộc tính tài nguyên</a-breadcrumb-item>
     </a-breadcrumb>
     <div class="actions-bar">
-      <a-button type="primary" @click="showCreateDetailModal" class="action-button">Thêm chi tiết thuộc tính tài nguyên</a-button>
-      <a-button type="primary" @click="showUsageModal" class="action-button">Sử dụng chi tiết tài nguyên cho công việc in</a-button>
+      <a-button type="primary" @click="showCreateDetailModal" class="action-button">Thêm chi tiết thuộc tính tài
+        nguyên</a-button>
+      <a-button type="primary" @click="showUsageModal" class="action-button">Sử dụng chi tiết tài nguyên cho công việc
+        in</a-button>
     </div>
-    <a-table
-      :columns="columns"
-      :dataSource="resourcePropertyDetails"
-      :pagination="{ pageSize: 10 }"
-      rowKey="id"
-    >
-    <template #bodyCell="{ column, record }">
+    <a-table :columns="columns" :dataSource="resourcePropertyDetails" :pagination="{ pageSize: 10 }" rowKey="id">
+      <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
-          <a @click="showEditModal(record)">Sửa</a>
-          <a-divider type="vertical" />
-          <a-popconfirm
-            title="Bạn có chắc chắn muốn xóa chi tiết thuộc tính tài nguyên này không?"
-            ok-text="Có"
-            cancel-text="Không"
-            @confirm="handleDelete(record.id)"
-          >
+          <!-- <a @click="showEditModal(record)">Sửa</a>
+          <a-divider type="vertical" /> -->
+          <a-popconfirm title="Bạn có chắc chắn muốn xóa chi tiết thuộc tính tài nguyên này không?" ok-text="Có"
+            cancel-text="Không" @confirm="handleDelete(record.id)">
             <a>Xóa</a>
           </a-popconfirm>
         </span>
+        <span v-else-if="column.key === 'propertyId'">
+          {{ resourceProperties.find((resourceProperty => resourceProperty.id == record.propertyId))?.resourcePropertyName }}
+        </span>
+
         <span v-else>{{ record[column.dataIndex] || '-' }}</span>
       </template>
     </a-table>
     <!-- Modal for Usage -->
-    <a-modal
-      v-model:visible="isUsageModalVisible"
-      title="Sử dụng chi tiết tài nguyên cho công việc in"
-      @ok="handleUsageOk"
-      @cancel="handleUsageCancel"
-    >
+    <a-modal v-model:visible="isUsageModalVisible" title="Sử dụng chi tiết tài nguyên cho công việc in"
+      @ok="handleUsageOk" @cancel="handleUsageCancel">
       <a-form :model="usageFormData" ref="usageForm" layout="vertical">
         <a-form-item label="Resource Property Detail" name="resourcePropertyDetailId" style="margin-bottom: 10px;">
-          <a-select
-            v-model:value="usageFormData.resourcePropertyDetailId"
-            placeholder="Chọn chi tiết thuộc tính tài nguyên"
-            :options="resourcePropertyDetailOptions"
-            style="width: 100%"
-          />
+          <a-select v-model:value="usageFormData.resourcePropertyDetailId"
+            placeholder="Chọn chi tiết thuộc tính tài nguyên" :options="resourcePropertyDetailOptions"
+            style="width: 100%" />
         </a-form-item>
         <a-form-item label="Print Job" name="printJobId" style="margin-bottom: 10px;">
-          <a-select
-            v-model:value="usageFormData.printJobId"
-            placeholder="Chọn công việc in"
-            :options="printJobOptions"
-            style="width: 100%"
-          />
+          <a-select v-model:value="usageFormData.printJobId" placeholder="Chọn công việc in" :options="printJobOptions"
+            style="width: 100%" />
         </a-form-item>
       </a-form>
     </a-modal>
 
     <!-- Modal for Adding Resource Property Detail -->
-    <a-modal
-      v-model:visible="isDetailModalVisible"
-      title="Chi tiết thuộc tính tài nguyên"
-      @ok="handleDetailOk"
-      @cancel="handleDetailCancel"
-    >
+    <a-modal v-model:visible="isDetailModalVisible" title="Chi tiết thuộc tính tài nguyên" @ok="handleDetailOk"
+      @cancel="handleDetailCancel">
       <a-form :model="detailFormData" :rules="detailRules" ref="resourcePropertyDetailForm" layout="vertical">
-        <a-form-item label="Property ID" name="propertyId" style="margin-bottom: 10px;">
-          <a-input v-model:value="detailFormData.propertyId" />
+        <a-form-item label="Tên thuộc tính" name="propertyId" style="margin-bottom: 10px;">
+          <a-select v-model:value="detailFormData.propertyId" placeholder="Chọn chi tiết thuộc tính" required>
+            <template v-for="resourceProperty in resourceProperties" :key="resourceProperty.id" >
+              <a-select-option :value="resourceProperty.id">
+                {{ resourceProperty.resourcePropertyName }}
+              </a-select-option>
+            </template>
+          </a-select>
         </a-form-item>
         <a-form-item label="Tên chi tiết thuộc tính" name="propertyDetailName" style="margin-bottom: 10px;">
           <a-input v-model:value="detailFormData.propertyDetailName" />
@@ -84,17 +72,22 @@
 
 <script>
 import { getAllResourcePropertyDetails, usingResourceForPrintJob, getAllPrintJobs } from '@/apis/projectApi';
-import { createResourcePropertyDetail} from '@/apis/resourcePropertyApi'; // Import the new API
+import { createResourcePropertyDetail } from '@/apis/resourcePropertyApi'; // Import the new API
 import { message } from 'ant-design-vue';
-
+import { getAllResources } from "@/apis/projectApi"
+import {
+  getAllResourceProperties,
+} from "@/apis/resourcePropertyApi"
 export default {
   name: 'ResourcePropertyDetails',
   data() {
     return {
+      resources: [],
+      resourceProperties: [],
       resourcePropertyDetails: [],
       columns: [
         {
-          title: 'Property ID',
+          title: 'Tên thuộc tính',
           dataIndex: 'propertyId',
           key: 'propertyId',
         },
@@ -103,11 +96,11 @@ export default {
           dataIndex: 'propertyDetailName',
           key: 'propertyDetailName',
         },
-        {
-          title: 'ID',
-          dataIndex: 'id',
-          key: 'id',
-        },
+        // {
+        //   title: 'ID',
+        //   dataIndex: 'id',
+        //   key: 'id',
+        // },
         {
           title: 'Giá',
           dataIndex: 'price',
@@ -142,7 +135,9 @@ export default {
   },
   async created() {
     await this.fetchResourcePropertyDetails();
-    await this.fetchPrintJobOptions(); 
+    await this.fetchPrintJobOptions();
+    await this.fetchResources()
+    this.fetchResourceProperties()
   },
   methods: {
     async fetchResourcePropertyDetails() {
@@ -216,6 +211,34 @@ export default {
     },
     handleDetailCancel() {
       this.isDetailModalVisible = false;
+    },
+    transformDataResourceProperties(data) {
+      return data.map((item) => {
+        item.resourceName =
+          this.resources.find((resource) => resource.id === item.resourceId)
+            ?.resourceName ?? ""
+        return item
+      })
+    },
+    async fetchResources() {
+      try {
+        const data = await getAllResources()
+        this.resources = data.data
+      } catch (error) {
+        message.error(error.message || "Có lỗi xảy ra khi tải tài nguyên!")
+      }
+    },
+    async fetchResourceProperties() {
+      try {
+        const data = await getAllResourceProperties()
+        this.resourceProperties = Array.isArray(data)
+          ? this.transformDataResourceProperties(data)
+          : []
+      } catch (error) {
+        message.error(
+          error.message || "Có lỗi xảy ra khi tải thuộc tính tài nguyên!"
+        )
+      }
     },
   },
 };
