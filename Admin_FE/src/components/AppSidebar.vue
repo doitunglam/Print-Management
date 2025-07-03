@@ -1,15 +1,6 @@
 <template>
-  <a-layout-sider
-    v-model:collapsed="collapsed"
-    collapsible
-    width="200"
-    class="site-layout-background"
-  >
-    <a-menu
-      mode="inline"
-      :default-selected-keys="[selectedKey]"
-      style="height: 100%; border-right: 0"
-    >
+  <a-layout-sider v-model:collapsed="collapsed" collapsible width="200" class="site-layout-background">
+    <a-menu mode="inline" :default-selected-keys="[selectedKey]" style="height: 100%; border-right: 0">
       <template v-if="isAdmin">
         <a-sub-menu key="projectManagement" title="Quản lý dự án">
           <a-menu-item v-for="item in projectManagementItems" :key="item.key">
@@ -49,8 +40,8 @@ export default {
       const roleMenuMap = {
         User: [
           { key: "9", label: "Quản lý dự án", route: "/project-management" },
-          { key: "10", label: "Quản lý in", route: "/print-management" },
           { key: "11", label: "Quản lý thiết kế", route: "/design-management" },
+          { key: "10", label: "Quản lý in", route: "/print-management" },
         ],
         Admin: [
           { key: "7", label: "Quản lý tài khoản", route: "/roles" },
@@ -97,13 +88,12 @@ export default {
           { key: "9", label: "Quản lý dự án", route: "/project-management" },
         ],
         Shipper: [
+          { key: "9", label: "Quản lý dự án", route: "/project-management" },
           {
             key: "5",
             label: "Quản lý giao hàng",
             route: "/shipper-management",
           },
-          { key: "9", label: "Quản lý dự án", route: "/project-management" },
-          { key: "14", label: "Danh sách khách hàng", route: "/customer" },
         ],
       }
 

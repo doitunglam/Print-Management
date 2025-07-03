@@ -4,29 +4,22 @@
       <a-breadcrumb-item>Trang chủ</a-breadcrumb-item>
       <a-breadcrumb-item>Quản lý thiết kế</a-breadcrumb-item>
     </a-breadcrumb>
-    <div class="actions-bar">
+    <div class="actions-bar" v-if="checkPermission('Design') > 0">
       <a-button type="primary" @click="showCreateModal">Thêm thiết kế</a-button>
     </div>
-    <a-table
-      :columns="columns"
-      :dataSource="designs"
-      :pagination="{ pageSize: 10 }"
-      rowKey="id"
-    >
+    <a-table :columns="columns" :dataSource="designs" :pagination="{ pageSize: 10 }" rowKey="id">
       <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
-          <a @click="approveDesign(record.id)">Phê duyệt</a>
-          <a-divider type="vertical" />
-          <a @click="showEditModal(record)">Sửa</a>
-          <a-divider type="vertical" />
-          <a-popconfirm
-            title="Bạn có chắc chắn muốn xóa thiết kế này không?"
-            ok-text="Có"
-            cancel-text="Không"
-            @confirm="handleDelete(record.id)"
-          >
-            <a>Xóa</a>
-          </a-popconfirm>
+          <div v-if="checkPermission('Design') > 0">
+            <a @click="approveDesign(record.id)">Phê duyệt</a>
+            <a-divider type="vertical" />
+            <a @click="showEditModal(record)">Sửa</a>
+            <a-divider type="vertical" />
+            <a-popconfirm title="Bạn có chắc chắn muốn xóa thiết kế này không?" ok-text="Có" cancel-text="Không"
+              @confirm="handleDelete(record.id)">
+              <a>Xóa</a>
+            </a-popconfirm>
+          </div>
         </span>
         <span v-else-if="column.key === 'filePath'">
           <img :src="record.filePath" alt="" class="design-image" />
@@ -36,49 +29,19 @@
     </a-table>
 
     <!-- Add Design Modal -->
-    <a-modal
-      v-model:visible="isModalVisible"
-      title="Thêm Thiết kế"
-      @ok="submitDesign"
-      @cancel="handleCancel"
-    >
-      <a-form
-        :model="newDesign"
-        :rules="rules"
-        ref="designForm"
-        layout="vertical"
-      >
+    <a-modal v-model:visible="isModalVisible" title="Thêm Thiết kế" @ok="submitDesign" @cancel="handleCancel">
+      <a-form :model="newDesign" :rules="rules" ref="designForm" layout="vertical">
         <a-form-item label="Dự án" name="projectId" style="margin-bottom: 10px">
-          <a-select
-            v-model:value="newDesign.projectId"
-            placeholder="Chọn một dự án"
-            required
-          >
-            <a-select-option
-              v-for="project in projects"
-              :key="project.id"
-              :value="project.id"
-            >
+          <a-select v-model:value="newDesign.projectId" placeholder="Chọn một dự án" required>
+            <a-select-option v-for="project in projects" :key="project.id" :value="project.id">
               {{ project.projectName }}
             </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item
-          label="ID Nhà thiết kế"
-          name="designerId"
-          style="margin-bottom: 10px"
-        >
-          <a-input
-            v-model:value="newDesign.designerId"
-            placeholder="Nhập ID nhà thiết kế"
-            required
-          />
+        <a-form-item label="ID Nhà thiết kế" name="designerId" style="margin-bottom: 10px">
+          <a-input v-model:value="newDesign.designerId" placeholder="Nhập ID nhà thiết kế" required />
         </a-form-item>
-        <a-form-item
-          label="Tệp Thiết kế"
-          name="filePath"
-          style="margin-bottom: 10px"
-        >
+        <a-form-item label="Tệp Thiết kế" name="filePath" style="margin-bottom: 10px">
           <a-upload :before-upload="handleFileUpload" :show-upload-list="false">
             <a-button icon="upload">Nhấn để Tải lên</a-button>
           </a-upload>
@@ -87,49 +50,19 @@
     </a-modal>
 
     <!-- Edit Design Modal -->
-    <a-modal
-      v-model:visible="isEditModalVisible"
-      title="Sửa Thiết kế"
-      @ok="handleUpdate"
-      @cancel="handleCancelEdit"
-    >
-      <a-form
-        :model="editDesign"
-        :rules="rules"
-        ref="editDesignForm"
-        layout="vertical"
-      >
+    <a-modal v-model:visible="isEditModalVisible" title="Sửa Thiết kế" @ok="handleUpdate" @cancel="handleCancelEdit">
+      <a-form :model="editDesign" :rules="rules" ref="editDesignForm" layout="vertical">
         <a-form-item label="Dự án" name="projectId" style="margin-bottom: 10px">
-          <a-select
-            v-model:value="editDesign.projectId"
-            placeholder="Chọn một dự án"
-            required
-          >
-            <a-select-option
-              v-for="project in projects"
-              :key="project.id"
-              :value="project.id"
-            >
+          <a-select v-model:value="editDesign.projectId" placeholder="Chọn một dự án" required>
+            <a-select-option v-for="project in projects" :key="project.id" :value="project.id">
               {{ project.projectName }}
             </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item
-          label="ID Nhà thiết kế"
-          name="designerId"
-          style="margin-bottom: 10px"
-        >
-          <a-input
-            v-model:value="editDesign.designerId"
-            placeholder="Nhập ID nhà thiết kế"
-            required
-          />
+        <a-form-item label="ID Nhà thiết kế" name="designerId" style="margin-bottom: 10px">
+          <a-input v-model:value="editDesign.designerId" placeholder="Nhập ID nhà thiết kế" required />
         </a-form-item>
-        <a-form-item
-          label="Tệp Thiết kế"
-          name="filePath"
-          style="margin-bottom: 10px"
-        >
+        <a-form-item label="Tệp Thiết kế" name="filePath" style="margin-bottom: 10px">
           <a-upload :before-upload="handleFileUpload" :show-upload-list="false">
             <a-button icon="upload">Nhấn để Tải lên</a-button>
           </a-upload>
@@ -148,6 +81,7 @@ import {
   deleteDesign,
 } from "@/apis/projectApi"
 import { getAllProjects } from "@/apis/projectApi"
+import { checkPermission } from '@/utils/index'
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { storage } from "@/firebaseConfig"
 import { message } from "ant-design-vue"
@@ -301,6 +235,9 @@ export default {
     handleCancelEdit() {
       this.isEditModalVisible = false
     },
+    checkPermission(page) {
+      return checkPermission(page)
+    },
   },
   mounted() {
     this.fetchDesigns()
@@ -319,6 +256,7 @@ export default {
   justify-content: space-between;
   margin-bottom: 16px;
 }
+
 .design-image {
   height: 100px;
   width: auto;

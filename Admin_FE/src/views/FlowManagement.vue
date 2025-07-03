@@ -31,7 +31,7 @@
         <a-table :columns="flowTemplateColumn" :dataSource="flowTemplates" :pagination="{ pageSize: 4 }" rowKey="id">
           <template #bodyCell="{ column, record }">
             <span v-if="column.key == 'productName'">
-              {{ products.find((product) => product.id == record.productId).name }}
+              {{ products.find((product) => product.id == record.productId)?.name }}
             </span>
             <span v-if="column.key === 'actions'">
               <a @click="showEditFlowTemplate(record)">Sửa</a>
@@ -40,6 +40,9 @@
                 @confirm="handleFlowTemplateDelete(record.id)">
                 <a>Xóa</a>
               </a-popconfirm>
+            </span>
+            <span v-else>
+              {{ record[column.dataIndex] ?? '-' }}
             </span>
           </template>
         </a-table>
@@ -58,7 +61,7 @@
     </a-modal>
 
     <!-- Edit Step Template Modal -->
-    <a-modal v-model:visible="modalVisibility['editStepTemplate']" title="Sửa bước xử lý"
+    <a-modal v-if="modalVisibility['editStepTemplate']" title="Sửa bước xử lý"
       @ok="submitEditStepTemplateModal" @cancel="handleCancel">
       <a-form :model="editStepTemplate" ref="addStepTemplateForm" layout="vertical">
         <a-form-item label="Tên bước xử lý" name="name" style="margin-bottom: 10px">
@@ -197,8 +200,16 @@ export default {
         designerId: "",
         filePath: "",
       },
-      editStepTemplate: null,
-      editFlowTemplate: null,
+      editStepTemplate: {
+        projectId: null,
+        name: "",
+        filePath: "",
+      },
+      editFlowTemplate: {
+        name: "",
+        productId: "",
+        stepFlowTemplates: []
+      },
       stepTemplateColumn: [
         {
           title: "ID",

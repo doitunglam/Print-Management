@@ -48,7 +48,6 @@ namespace Print_Management.Controllers
         }
 
         [HttpGet("all-users")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers()
         {
             var result = await _authService.GetAllUsersAsync();

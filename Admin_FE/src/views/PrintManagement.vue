@@ -6,7 +6,7 @@
     </a-breadcrumb>
 
     <!-- Đặt hai nút trên cùng một dòng với chiều dài bằng nhau -->
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;" v-if="checkPermission('Project') > 0">
       <a-button type="primary" @click="showModal" style="flex: 1; margin-right: 10px;">
         Xác nhận thiết kế cho công việc in
       </a-button>
@@ -25,16 +25,18 @@
     >
     <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
-          <a @click="showEditModal(record)">Sửa</a>
-          <a-divider type="vertical" />
-          <a-popconfirm
+          <div v-if="checkPermission('Project') > 0">
+            <a @click="showEditModal(record)">Sửa</a>
+            <a-divider type="vertical" />
+            <a-popconfirm
             title="Bạn có chắc chắn muốn xóa công việc in này không?"
             ok-text="Có"
             cancel-text="Không"
             @confirm="handleDelete(record.id)"
-          >
+            >
             <a>Xóa</a>
           </a-popconfirm>
+        </div>
         </span>
         <span v-else>{{ record[column.dataIndex] || '-' }}</span>
       </template>
@@ -127,6 +129,7 @@ import {
   confirmFinishingProject as apiConfirmFinishingProject,
   getAllProjects,
 } from '@/apis/projectApi';
+import { checkPermission } from '@/utils/index'
 import {
   getAllDesigns,
   updatePrintJob,
@@ -264,6 +267,9 @@ export default {
     },
     handleCancelEdit() {
       this.isEditPrintJobModalVisible = false;
+    },
+    checkPermission(page) {
+      return checkPermission(page)
     },
   },
 };

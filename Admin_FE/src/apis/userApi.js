@@ -3,6 +3,7 @@ import axiosInstance from './axiosConfig';
 export const getAllUsers = async () => {
   try {
     const response = await axiosInstance.get('/user');
+    console.log(response)
     if (!response.data.success) {
       throw new Error(response.data.message || 'Error fetching users');
     }

@@ -4,18 +4,13 @@
       <a-breadcrumb-item>Trang chủ</a-breadcrumb-item>
       <a-breadcrumb-item>Quản lý dự án</a-breadcrumb-item>
     </a-breadcrumb>
-    <div class="actions-bar">
+    <div class="actions-bar" v-if="checkPermission('Project') > 0">
       <a-button type="primary" @click="showCreateModal">Thêm dự án</a-button>
     </div>
-    <a-table
-      :columns="columns"
-      :dataSource="projects"
-      :pagination="{ pageSize: 10 }"
-      rowKey="id"
-    >
-    <template #bodyCell="{ column, record }">
+    <a-table :columns="columns" :dataSource="projects" :pagination="{ pageSize: 10 }" rowKey="id">
+      <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
-          <a @click="showEditModal(record)">Sửa</a>
+          <a @click="showEditModal(record)" v-if="checkPermission('Project') > 0">Sửa</a>
           <!-- <a-divider type="vertical" />
           <a-popconfirm
             title="Bạn có chắc chắn muốn xóa dự án này không?"
@@ -26,15 +21,16 @@
             <a>Xóa</a>
           </a-popconfirm> -->
         </span>
+        <span v-else-if="column.key === 'employeeName'">
+          {{users.findLast(user => user.id == record.employeeId)?.fullName ?? '-'}}
+        </span>
+                <span v-else-if="column.key === 'customerName'">
+          {{customers.findLast(customer => customer.id == record.customerId)?.fullName ?? '-'}}
+        </span>
         <span v-else>{{ record[column.dataIndex] || '-' }}</span>
       </template>
     </a-table>
-    <a-modal
-      v-model:visible="isModalVisible"
-      title="Dự án"
-      @ok="handleOk"
-      @cancel="handleCancel"
-    >
+    <a-modal v-model:visible="isModalVisible" title="Dự án" @ok="handleOk" @cancel="handleCancel">
       <a-form :model="formData" :rules="rules" ref="projectForm" layout="vertical">
         <a-form-item label="Tên dự án" name="projectName" style="margin-bottom: 10px;">
           <a-input v-model:value="formData.projectName" />
@@ -48,24 +44,28 @@
         <a-form-item label="Ngày kết thúc dự kiến" name="expectedEndDate" style="margin-bottom: 10px;">
           <a-date-picker v-model:value="formData.expectedEndDate" style="width: 100%;" />
         </a-form-item>
-        <a-form-item label="ID nhân viên" name="employeeId" style="margin-bottom: 10px;">
-          <a-input-number v-model:value="formData.employeeId" style="width: 100%;" />
-        </a-form-item>
+        <a-form-item label="Tên nhân viên" name="employeeId" style="margin-bottom: 10px;">
+          <a-select v-model:value="formData.customerId" placeholder="Chọn một khách hàng" required>
+            <a-select-option v-for="user in usersFiltered" :key="user.id" :value="user.id">
+              {{ user.id }} - {{ user.fullName }}
+            </a-select-option>
+          </a-select> </a-form-item>
         <a-form-item label="Khách hàng" name="customerId" style="margin-bottom: 10px;">
-  <a-select v-model:value="formData.customerId" placeholder="Chọn một khách hàng" required>
-    <a-select-option v-for="customer in customers" :key="customer.id" :value="customer.id">
-      {{ customer.id }} - {{ customer.fullName }} 
-    </a-select-option>
-  </a-select>
-</a-form-item>
+          <a-select v-model:value="formData.customerId" placeholder="Chọn một khách hàng" required>
+            <a-select-option v-for="customer in customers" :key="customer.id" :value="customer.id">
+              {{ customer.id }} - {{ customer.fullName }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
 
-<a-form-item label="Trạng thái dự án (0: Đang Thiết Kế, 1: Đang In, 2: Đã Hoàn Thành)" name="projectStatus" style="margin-bottom: 10px;">
-  <a-select v-model:value="formData.projectStatus" placeholder="Chọn trạng thái dự án" style="width: 100%;">
-    <a-select-option value="0">Đang Thiết Kế</a-select-option>
-    <a-select-option value="1">Đang In</a-select-option>
-    <a-select-option value="2">Đã Hoàn Thành</a-select-option>
-  </a-select>
-</a-form-item>
+        <a-form-item label="Trạng thái dự án (0: Đang Thiết Kế, 1: Đang In, 2: Đã Hoàn Thành)" name="projectStatus"
+          style="margin-bottom: 10px;">
+          <a-select v-model:value="formData.projectStatus" placeholder="Chọn trạng thái dự án" style="width: 100%;">
+            <a-select-option :value="0">Đang Thiết Kế</a-select-option>
+            <a-select-option :value="1">Đang In</a-select-option>
+            <a-select-option :value="2">Đã Hoàn Thành</a-select-option>
+          </a-select>
+        </a-form-item>
 
       </a-form>
     </a-modal>
@@ -74,7 +74,9 @@
 
 <script>
 import { getAllProjects, createProject, updateProject, deleteProject } from '@/apis/projectApi';
+import { checkPermission } from '@/utils/index';
 import { getAllCustomers } from '@/apis/projectApi';  // Giả sử bạn có một API như vậy.
+import { getAllUsersFromAllUsersApi } from '@/apis/userApi';
 import { message } from 'ant-design-vue';
 import dayjs from 'dayjs';
 
@@ -84,16 +86,13 @@ export default {
     return {
       projects: [],
       customers: [],
+      users: [],
+      usersFiltered: [],
       columns: [
         {
           title: 'Tên dự án',
           dataIndex: 'projectName',
           key: 'projectName',
-        },
-        {
-          title: 'ID',
-          dataIndex: 'id',
-          key: 'id',
         },
         {
           title: 'Mô tả',
@@ -111,14 +110,14 @@ export default {
           key: 'expectedEndDate',
         },
         {
-          title: 'ID nhân viên',
-          dataIndex: 'employeeId',
-          key: 'employeeId',
+          title: 'Tên nhân viên',
+          dataIndex: 'employeeName',
+          key: 'employeeName',
         },
         {
-          title: 'ID khách hàng',
-          dataIndex: 'customerId',
-          key: 'customerId',
+          title: 'Tên khách hàng',
+          dataIndex: 'customerName',
+          key: 'customerName',
         },
         {
           title: 'Trạng thái dự án',
@@ -156,6 +155,7 @@ export default {
   async created() {
     this.fetchProjects();
     this.fetchCustomers();  // Gọi API lấy danh sách khách hàng
+    this.fetchUsers();
   },
   methods: {
     async fetchProjects() {
@@ -167,14 +167,23 @@ export default {
       }
     },
     async fetchCustomers() {
-        try {
-          const data = await getAllCustomers();
-          console.log(data);
-          this.customers = data.data;
-        } catch (error) {
-          message.error(error.message || 'Có lỗi xảy ra khi tải danh sách khách hàng!');
-        }
-      },
+      try {
+        const data = await getAllCustomers();
+        this.customers = data.data;
+      } catch (error) {
+        message.error(error.message || 'Có lỗi xảy ra khi tải danh sách khách hàng!');
+      }
+    },
+    async fetchUsers() {
+      try {
+        const data = await getAllUsersFromAllUsersApi();
+        this.users = data;
+        this.usersFiltered = data.filter(t => t.roles.includes("Employee"))
+      } catch (error) {
+        message.error(error.message || 'Có lỗi xảy ra khi tải danh sách người dùng!');
+      }
+    },
+
     showCreateModal() {
       this.isEditing = false;
       this.formData = {
@@ -232,6 +241,9 @@ export default {
     handleCancel() {
       this.isModalVisible = false;
     },
+    checkPermission(page) {
+      return checkPermission(page)
+    },
     async handleDelete(id) {
       try {
         await deleteProject(id);
@@ -242,9 +254,10 @@ export default {
       }
     },
     mounted() {
-    this.fetchCustomers();
-    this.fetchProjects();
-  },
+      this.fetchCustomers();
+      this.fetchProjects();
+      this.fetchUsers();
+    },
   },
 };
 </script>
