@@ -21,7 +21,8 @@
           </a-popconfirm>
         </span>
         <span v-else-if="column.key === 'propertyId'">
-          {{ resourceProperties.find((resourceProperty => resourceProperty.id == record.propertyId))?.resourcePropertyName }}
+          {{resourceProperties.find((resourceProperty => resourceProperty.id ==
+            record.propertyId))?.resourcePropertyName }}
         </span>
 
         <span v-else>{{ record[column.dataIndex] || '-' }}</span>
@@ -37,8 +38,13 @@
             style="width: 100%" />
         </a-form-item>
         <a-form-item label="Print Job" name="printJobId" style="margin-bottom: 10px;">
-          <a-select v-model:value="usageFormData.printJobId" placeholder="Chọn công việc in" :options="printJobOptions"
-            style="width: 100%" />
+          <a-select v-model:value="usageFormData.printJobId" placeholder="Chọn công việc in" style="width: 100%">
+            <a-select-option v-for="printJob in printJobOptions" :key="printJob.id" :value="printJob.id">
+              ID: {{ printJob.value }} - Project Name: {{projects.find(project => project.id == designs.find(design => design.id ==
+                printJob.value)?.projectId)?.projectName }}
+            </a-select-option>
+          </a-select>
+
         </a-form-item>
       </a-form>
     </a-modal>
@@ -49,7 +55,7 @@
       <a-form :model="detailFormData" :rules="detailRules" ref="resourcePropertyDetailForm" layout="vertical">
         <a-form-item label="Tên thuộc tính" name="propertyId" style="margin-bottom: 10px;">
           <a-select v-model:value="detailFormData.propertyId" placeholder="Chọn chi tiết thuộc tính" required>
-            <template v-for="resourceProperty in resourceProperties" :key="resourceProperty.id" >
+            <template v-for="resourceProperty in resourceProperties" :key="resourceProperty.id">
               <a-select-option :value="resourceProperty.id">
                 {{ resourceProperty.resourcePropertyName }}
               </a-select-option>
@@ -76,12 +82,19 @@ import { createResourcePropertyDetail } from '@/apis/resourcePropertyApi'; // Im
 import { message } from 'ant-design-vue';
 import { getAllResources } from "@/apis/projectApi"
 import {
+  getAllDesigns
+} from "@/apis/projectApi"
+import {
   getAllResourceProperties,
 } from "@/apis/resourcePropertyApi"
+import { getAllProjects } from '@/apis/projectApi';
+
 export default {
   name: 'ResourcePropertyDetails',
   data() {
     return {
+      projects: [],
+      designs: [],
       resources: [],
       resourceProperties: [],
       resourcePropertyDetails: [],
@@ -138,8 +151,18 @@ export default {
     await this.fetchPrintJobOptions();
     await this.fetchResources()
     this.fetchResourceProperties()
+    this.fetchDesigns()
+    this.fetchProjects()
   },
   methods: {
+    async fetchProjects() {
+      try {
+        const data = await getAllProjects();
+        this.projects = data;
+      } catch (error) {
+        message.error(error.message || 'Có lỗi xảy ra khi tải dự án!');
+      }
+    },
     async fetchResourcePropertyDetails() {
       try {
         const data = await getAllResourcePropertyDetails();
@@ -238,6 +261,13 @@ export default {
         message.error(
           error.message || "Có lỗi xảy ra khi tải thuộc tính tài nguyên!"
         )
+      }
+    },
+    async fetchDesigns() {
+      try {
+        this.designs = await getAllDesigns()
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách thiết kế:", error)
       }
     },
   },
