@@ -32,6 +32,12 @@
           </a-popconfirm>
         </div> -->
         </span>
+        <span v-else-if="column.key === 'customerId'">
+          {{users.findLast(user => user.id == record.customerId)?.fullName ?? '-'}}
+        </span>
+        <span v-else-if="column.key === 'deliverId'">
+          {{users.findLast(user => user.id == record.deliverId)?.fullName ?? '-'}}
+        </span>
         <span v-else>{{ record[column.dataIndex] || "-" }}</span>
       </template>
     </a-table>
@@ -128,6 +134,7 @@ import {
 import { getAllProjects } from "@/apis/projectApi"
 import { getAllCustomers } from "@/apis/projectApi"
 import { message } from "ant-design-vue"
+import { getAllUsersFromAllUsersApi } from '@/apis/userApi';
 
 export default {
   name: "ShippingManagement",
@@ -136,6 +143,7 @@ export default {
       deliveries: [],
       customers: [],
       projects: [],
+      users: [],
       columns: [
         {
           title: "Địa chỉ giao hàng",
@@ -200,6 +208,7 @@ export default {
   async created() {
     await Promise.all([this.fetchCustomers(), this.fetchProjects()])
     this.fetchDeliveries()
+    this.fetchUsers()
   },
   methods: {
     async fetchDeliveries() {
@@ -272,6 +281,15 @@ export default {
         this.fetchDeliveries()
       } catch (error) {
         message.error(error.message || "Có lỗi xảy ra khi cập nhật trạng thái!")
+      }
+    },
+    async fetchUsers() {
+      try {
+        const data = await getAllUsersFromAllUsersApi();
+        this.users = data;
+        this.usersFiltered = data.filter(t => t.roles.includes("Designer"))
+      } catch (error) {
+        message.error(error.message || 'Có lỗi xảy ra khi tải danh sách người dùng!');
       }
     },
   },

@@ -141,11 +141,11 @@ export default {
     return {
       resourceProperties: [],
       columns: [
-        {
-          title: "ID",
-          dataIndex: "id",
-          key: "id",
-        },
+        // {
+        //   title: "ID",
+        //   dataIndex: "id",
+        //   key: "id",
+        // },
         {
           title: "Tên thuộc tính",
           dataIndex: "resourcePropertyName",

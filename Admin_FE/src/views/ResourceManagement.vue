@@ -86,11 +86,11 @@ export default {
           dataIndex: 'resourceName',
           key: 'resourceName',
         },
-        {
-          title: 'ID',
-          dataIndex: 'id',
-          key: 'id',
-        },
+        // {
+        //   title: 'ID',
+        //   dataIndex: 'id',
+        //   key: 'id',
+        // },
         // {
         //   title: 'Hình ảnh',
         //   dataIndex: 'image',

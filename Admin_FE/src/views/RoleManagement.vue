@@ -96,11 +96,11 @@ export default {
     return {
       users: [],
       columns: [
-      {
-          title: 'Id',
-          dataIndex: 'id',
-          key: 'id',
-        },
+      // {
+      //     title: 'Id',
+      //     dataIndex: 'id',
+      //     key: 'id',
+      //   },
         {
           title: 'Tài khoản',
           dataIndex: 'userName',
@@ -131,11 +131,11 @@ export default {
           dataIndex: 'updateTime',
           key: 'updateTime',
         },
-        {
-          title: 'ID Đội nhóm',
-          dataIndex: 'teamId',
-          key: 'teamId',
-        },
+        // {
+        //   title: 'ID Đội nhóm',
+        //   dataIndex: 'teamId',
+        //   key: 'teamId',
+        // },
         {
           title: 'Vai trò',
           dataIndex: 'roles',

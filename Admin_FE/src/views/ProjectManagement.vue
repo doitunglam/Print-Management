@@ -45,7 +45,7 @@
           <a-date-picker v-model:value="formData.expectedEndDate" style="width: 100%;" />
         </a-form-item>
         <a-form-item label="Tên nhân viên" name="employeeId" style="margin-bottom: 10px;">
-          <a-select v-model:value="formData.customerId" placeholder="Chọn một khách hàng" required>
+          <a-select v-model:value="formData.employeeId" placeholder="Chọn một nhân viên" required>
             <a-select-option v-for="user in usersFiltered" :key="user.id" :value="user.id">
               {{ user.id }} - {{ user.fullName }}
             </a-select-option>

@@ -31,7 +31,8 @@
         </span>
         <span v-else-if="column.key == 'projectId'">
           {{projects.find((project) => project.id == designs.findLast(design => design.id ==
-            record.designId)?.projectId)?.projectName}}
+            record.designId)?.projectId)?.projectName}}  - {{projects.find((project) => project.id == designs.findLast(design => design.id ==
+            record.designId)?.projectId)?.requestDescriptionFromCustomer}}
         </span>
         <span v-else-if="column.key == 'designImage'">
           <img :src="designs.findLast(design => design.id ==
@@ -48,7 +49,7 @@
         <a-form-item label="Dự án in" name="projectId" style="margin-bottom: 10px;">
           <a-select v-model:value="formData.projectId" placeholder="Chọn dự án thiết kế" required>
             <a-select-option v-for="project in projects" :key="project.id" :value="project.id">
-              {{ project.projectName }}
+              {{ project.projectName }} - {{ project.requestDescriptionFromCustomer }}
             </a-select-option>
           </a-select>
         </a-form-item>

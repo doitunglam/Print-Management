@@ -27,6 +27,9 @@
         <span v-else-if="column.key === 'projectId'">
           {{projects.findLast(project => project.id == record.projectId)?.projectName ?? '-'}}
         </span>
+        <span v-else-if="column.key === 'projectDesc'">
+          {{projects.findLast(project => project.id == record.projectId)?.requestDescriptionFromCustomer ?? '-'}}
+        </span>
         <span v-else-if="column.key === 'designerId'">
           {{users.findLast(user => user.id == record.designerId)?.fullName ?? '-'}}
         </span>
@@ -43,7 +46,7 @@
         <a-form-item label="Dự án" name="projectId" style="margin-bottom: 10px">
           <a-select v-model:value="newDesign.projectId" placeholder="Chọn một dự án" required>
             <a-select-option v-for="project in projects" :key="project.id" :value="project.id">
-              {{ project.projectName }}
+              {{ project.projectName }} - {{ project.requestDescriptionFromCustomer }}
             </a-select-option>
           </a-select>
         </a-form-item>
@@ -123,15 +126,20 @@ export default {
         filePath: "",
       },
       columns: [
-        {
-          title: "Mã thiết kế",
-          dataIndex: "id",
-          key: "id",
-        },
+        // {
+        //   title: "Mã thiết kế",
+        //   dataIndex: "id",
+        //   key: "id",
+        // },
         {
           title: "Dự án",
           dataIndex: "projectId",
           key: "projectId",
+        },
+        {
+          title: "Mô tả dự án",
+          dataIndex: "projectDesc",
+          key: "projectDesc",
         },
         {
           title: "Nhà thiết kế",
@@ -266,7 +274,7 @@ export default {
       try {
         const data = await getAllUsersFromAllUsersApi();
         this.users = data;
-        this.usersFiltered = data.filter(t => t.roles.includes("Employee"))
+        this.usersFiltered = data.filter(t => t.roles.includes("Designer"))
       } catch (error) {
         message.error(error.message || 'Có lỗi xảy ra khi tải danh sách người dùng!');
       }

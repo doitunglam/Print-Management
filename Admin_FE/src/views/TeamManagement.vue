@@ -89,11 +89,11 @@ export default {
           dataIndex: 'updateTime',
           key: 'updateTime',
         },
-        {
-          title: 'ID Quản lý',
-          dataIndex: 'managerId',
-          key: 'managerId',
-        },
+        // {
+        //   title: 'ID Quản lý',
+        //   dataIndex: 'managerId',
+        //   key: 'managerId',
+        // },
         {
           title: 'Hành động',
           key: 'actions',
