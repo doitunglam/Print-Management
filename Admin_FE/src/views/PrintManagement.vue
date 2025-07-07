@@ -143,6 +143,7 @@ export default {
       designs: [],
       projects: [],
       columns: [
+        { title: 'ID', dataIndex: 'id', key: 'id' },
         { title: 'Dự án', dataIndex: 'projectId', key: 'projectId' },
         { title: 'Mẫu thiết kế', dataIndex: 'designImage', key: 'designImage' },
         { title: 'Trạng thái công việc in', dataIndex: 'printJobStatus', key: 'printJobStatus' },

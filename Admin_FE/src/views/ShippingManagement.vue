@@ -33,7 +33,7 @@
         </div> -->
         </span>
         <span v-else-if="column.key === 'customerId'">
-          {{users.findLast(user => user.id == record.customerId)?.fullName ?? '-'}}
+          {{customers.findLast(user => user.id == record.customerId)?.fullName ?? '-'}}
         </span>
         <span v-else-if="column.key === 'deliverId'">
           {{users.findLast(user => user.id == record.deliverId)?.fullName ?? '-'}}
@@ -166,12 +166,12 @@ export default {
           key: "deliveryStatus",
         },
         {
-          title: "ID Khách hàng",
+          title: "Khách hàng",
           dataIndex: "customerId",
           key: "customerId",
         },
         {
-          title: "ID Người giao hàng",
+          title: "Người giao hàng",
           dataIndex: "deliverId",
           key: "deliverId",
         },

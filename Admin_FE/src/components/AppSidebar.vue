@@ -72,11 +72,6 @@ export default {
           { key: "11", label: "Quản lý thiết kế", route: "/design-management" },
           { key: "10", label: "Quản lý in", route: "/print-management" },
           {
-            key: "12",
-            label: "Quản lý thuộc tính tài nguyên",
-            route: "/resource-properties",
-          },
-          {
             key: "13",
             label: "Quản lý chi tiết thuộc tính tài nguyên",
             route: "/resource-property-details",

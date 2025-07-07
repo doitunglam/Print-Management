@@ -96,11 +96,11 @@ export default {
     return {
       users: [],
       columns: [
-      // {
-      //     title: 'Id',
-      //     dataIndex: 'id',
-      //     key: 'id',
-      //   },
+      {
+          title: 'Id',
+          dataIndex: 'id',
+          key: 'id',
+        },
         {
           title: 'Tài khoản',
           dataIndex: 'userName',
