@@ -645,5 +645,91 @@ namespace PM.Application.ImplementService
                 };
             }
         }
+
+        public async Task<ResponseObject<DataResponseResourcePropertyDetail>> UpdateResourcePropertyDetailsAsync(long entityId, Request_CreateResourcePropertyDetail request)
+        {
+            try
+            {
+                var entity = await _resourcePropertyDetailRepository.GetByIdAsync(entityId);
+                if (entity == null)
+                {
+                    return new ResponseObject<DataResponseResourcePropertyDetail>
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = "Project not found.",
+                        Data = null
+                    };
+                }
+
+
+                entity.PropertyId = request.PropertyId;
+                entity.PropertyDetailName = request.PropertyDetailName;
+                entity.Price = request.Price;
+                entity.Quantity = request.Quantity;
+                
+
+                await _resourcePropertyDetailRepository.UpdateAsync(entity);
+
+                var response = new DataResponseResourcePropertyDetail
+                {
+                    PropertyId = entity.PropertyId,
+                    PropertyDetailName = entity.PropertyDetailName,
+                    Price = entity.Price,
+                    Quantity = entity.Quantity,
+                };
+
+                return new ResponseObject<DataResponseResourcePropertyDetail>
+                {
+                    Status = StatusCodes.Status200OK,
+                    Message = "Project is updated successfully.",
+                    Data = response
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseObject<DataResponseResourcePropertyDetail>
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Message = ex.Message,
+                    Data = null
+                };
+            }
+        }
+
+        public async Task<ResponseObject<DataResponseResourcePropertyDetail>> DeleteResourcePropertyDetailsAsync(long entityId)
+        {
+            try
+            {
+                var entity = await _resourcePropertyDetailRepository.GetByIdAsync(entityId);
+                if (entity == null)
+                {
+                    return new ResponseObject<DataResponseResourcePropertyDetail>
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = "Project not found.",
+                        Data = null
+                    };
+                }
+                ;
+
+                await _resourcePropertyDetailRepository.DeleteAsync(entityId);
+
+                return new ResponseObject<DataResponseResourcePropertyDetail>
+                {
+                    Status = StatusCodes.Status200OK,
+                    Message = "Project is deleted successfully.",
+                    Data = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseObject<DataResponseResourcePropertyDetail>
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Message = ex.Message,
+                    Data = null
+                };
+            }
+        }
     }
 }

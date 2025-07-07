@@ -12,15 +12,16 @@ namespace PM.Application.InterfaceService
     public interface IResourceManagementService
     {
         Task<ResponseObject<DataResponseResourceForPrintJob>> CreateResourceForPrintJobAsync(Request_CreateResourceForPrintJob request);
+        Task<ResponseObject<List<DataResponseResourcePropertyDetail>>> GetAllResourcePropertyDetailsAsync();
         Task<ResponseObject<DataResponseResourcePropertyDetail>> CreateResourcePropertyDetailAsync(Request_CreateResourcePropertyDetail request);
+        Task<ResponseObject<DataResponseResourcePropertyDetail>> UpdateResourcePropertyDetailsAsync(long entityId, Request_CreateResourcePropertyDetail request);
+        Task<ResponseObject<DataResponseResourcePropertyDetail>> DeleteResourcePropertyDetailsAsync(long entityId);
         Task<ResponseObject<DataResponseResourceProperty>> CreateResourcePropertyAsync(Request_CreateResourceProperty request);
         Task<ResponseObject<DataResponseResource>> CreateResourceAsync(Request_CreateResource request);
-
         Task<ResponseObject<List<DataResponseResource>>> GetAllResourcesAsync();
 
         Task<ResponseObject<List<DataResponseResourceProperty>>> GetAllResourcePropertiesAsync();
 
-        Task<ResponseObject<List<DataResponseResourcePropertyDetail>>> GetAllResourcePropertyDetailsAsync();
         Task<ResponseObject<DataResponseResourceForPrintJob>> UsingResourceForPrintJob(Request_CreateResourceForPrintJob request);
 
     }

@@ -512,6 +512,33 @@ namespace Print_Management.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("ResourcePropertyDetail/{id}")]
+        public async Task<IActionResult> UpdateResourcePropertyDetailAsync(long id, [FromBody] Request_CreateResourcePropertyDetail request)
+        {
+            try
+            {
+                var response = await _resourceManagementService.UpdateResourcePropertyDetailsAsync(id, request);
+                if (response.Status == StatusCodes.Status400BadRequest)
+                {
+                    return BadRequest(response.Message); // Return specific error message
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        [Route("ResourcePropertyDetail/{id}")]
+        public async Task<IActionResult> DeleteResourcePropertyDetailAsync(long id)
+        {
+            var result = await _resourceManagementService.DeleteResourcePropertyDetailsAsync(id);
+
+            return StatusCode(result.Status, result);
+        }
 
         //[HttpPost("CreateResource-for-print-job")]
         //[Authorize]
