@@ -5,8 +5,7 @@ import type { OrderType } from "@/types/main";
 const CUSTOMER_ID = "0";
 Http.defaults.timeout = 20000;
 
-const urlGetAllProducts = "/api/Project/getAllProduct";
-const urlGetProductById = "/api/Project/getProductBy";
+const ProductResourceUrl = "/api/Project/Product";
 const urlGetAllDesigns = "/api/Project/all-designs";
 const urlCreateOrder = "/api/Project/createOrder";
 const urlGetAllOrder = `/api/Project/getAllOrder?customerId=${CUSTOMER_ID}`;
@@ -17,7 +16,7 @@ export const getAllProducts = (): Promise<any> => {
     header: {},
     params: {},
   };
-  return Http.get(`${urlGetAllProducts}`, config);
+  return Http.get(`${ProductResourceUrl}`, config);
 };
 
 export const getProductById = (id: number): Promise<any> => {
@@ -25,7 +24,7 @@ export const getProductById = (id: number): Promise<any> => {
     header: {},
     params: {},
   };
-  return Http.get(`${urlGetProductById}/${id}`, config);
+  return Http.get(`${ProductResourceUrl}/${id}`, config);
 };
 
 export const getAllDesigns = (): Promise<any> => {

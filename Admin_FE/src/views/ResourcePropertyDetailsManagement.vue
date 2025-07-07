@@ -13,20 +13,16 @@
     <a-table :columns="columns" :dataSource="resourcePropertyDetails" :pagination="{ pageSize: 10 }" rowKey="id">
       <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
-          <!-- <a @click="showEditModal(record)">Sửa</a>
-          <a-divider type="vertical" /> -->
-          <!-- <a-popconfirm
-            title="Bạn có chắc chắn muốn xóa chi tiết thuộc tính tài nguyên này không?"
-            ok-text="Có"
-            cancel-text="Không"
-            @confirm="handleDelete(record.id)"
-          >
+          <a @click="showEditModal(record)">Sửa</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="Bạn có chắc chắn muốn xóa chi tiết thuộc tính tài nguyên này không?" ok-text="Có"
+            cancel-text="Không" @confirm="handleDelete(record.id)">
             <a>Xóa</a>
-          </a-popconfirm> -->
+          </a-popconfirm>
         </span>
         <span v-else-if="column.key === 'propertyId'">
           {{resourceProperties.find((resourceProperty => resourceProperty.id ==
-            record.propertyId))?.resourcePropertyName }}
+            record.propertyId))?.resourcePropertyName}}
         </span>
 
         <span v-else>{{ record[column.dataIndex] || '-' }}</span>
@@ -44,7 +40,8 @@
         <a-form-item label="Print Job" name="printJobId" style="margin-bottom: 10px;">
           <a-select v-model:value="usageFormData.printJobId" placeholder="Chọn công việc in" style="width: 100%">
             <a-select-option v-for="printJob in printJobOptions" :key="printJob.id" :value="printJob.value">
-              ID: {{ printJob.value }} - Project Desc.: {{projects.find(project => project.id == designs.find(design => design.id ==
+              ID: {{ printJob.value }} - Project Desc.: {{projects.find(project => project.id == designs.find(design =>
+                design.id ==
                 printJob.value)?.projectId)?.requestDescriptionFromCustomer }}
             </a-select-option>
           </a-select>
@@ -54,11 +51,11 @@
     </a-modal>
 
     <!-- Modal for Adding Resource Property Detail -->
-    <a-modal v-model:visible="isDetailModalVisible" title="Chi tiết thuộc tính tài nguyên" @ok="handleDetailOk"
+    <a-modal v-model:visible="isDetailModalVisible" :title="isEditing ? 'Chi tiết thuộc tính tài nguyên' : 'Sửa chi tiết thuộc tính tài nguyên'" @ok="handleDetailOk"
       @cancel="handleDetailCancel">
       <a-form :model="detailFormData" :rules="detailRules" ref="resourcePropertyDetailForm" layout="vertical">
         <a-form-item label="Tên thuộc tính" name="propertyId" style="margin-bottom: 10px;">
-          <a-select v-model:value="detailFormData.propertyId" placeholder="Chọn chi tiết thuộc tính" required>
+          <a-select v-model:value="detailFormData.propertyId" placeholder="Chọn chi tiết thuộc tính" required :disabled="isEditing">
             <template v-for="resourceProperty in resourceProperties" :key="resourceProperty.id">
               <a-select-option :value="resourceProperty.id">
                 {{ resourceProperty.resourcePropertyName }}
@@ -128,10 +125,10 @@ export default {
           dataIndex: 'quantity',
           key: 'quantity',
         },
-        // {
-        //   title: 'Hành động',
-        //   key: 'actions',
-        // },
+        {
+          title: 'Hành động',
+          key: 'actions',
+        },
       ],
       isUsageModalVisible: false, // State for the usage modal
       isDetailModalVisible: false, // State for the new detail modal
@@ -274,6 +271,14 @@ export default {
       } catch (error) {
         console.error("Lỗi khi lấy danh sách thiết kế:", error)
       }
+    },
+    showEditModal(record) {
+      this.isEditing = true;
+      
+      this.detailFormData = {
+        ...record
+      };
+      this.isDetailModalVisible = true;
     },
   },
 };

@@ -242,7 +242,7 @@ namespace Print_Management.Controllers
         }
 
         // Method to test Create Product
-        [HttpPost("CreateProduct")]
+        [HttpPost("Product")]
         public async Task<IActionResult> CreateProduct([FromBody] Request_CreateProduct request)
         {
             var response = await _productService.CreateProductAsync(request);
@@ -254,7 +254,7 @@ namespace Print_Management.Controllers
         }
 
         // Method to test Get All Products
-        [HttpGet("getAllProduct")]
+        [HttpGet("Product")]
         public async Task<IActionResult> GetAllProducts()
         {
             var response = await _productService.GetAllProductsAsync();
@@ -262,11 +262,39 @@ namespace Print_Management.Controllers
         }
 
         // Method to test Get Product by ID
-        [HttpGet("getProductBy/{id}")]
+        [HttpGet("Product/{id}")]
         public async Task<IActionResult> GetProductById(long id)
         {
             var response = await _productService.GetProductByIdAsync(id);
             return StatusCode(response.Status, response);
+        }
+
+        [HttpPut]
+        [Route("Product/{id}")]
+        public async Task<IActionResult> UpdateProductAsync(long id, [FromBody] Request_CreateProduct request)
+        {
+            try
+            {
+                var response = await _productService.UpdateProductAsync(id, request);
+                if (response.Status == StatusCodes.Status400BadRequest)
+                {
+                    return BadRequest(response.Message); // Return specific error message
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        [Route("Product/{id}")]
+        public async Task<IActionResult> DeleteProductAsync(long id)
+        {
+            var result = await _productService.DeleteProductAsync(id);
+
+            return StatusCode(result.Status, result);
         }
 
         [HttpPost("createOrder")]
@@ -299,9 +327,6 @@ namespace Print_Management.Controllers
             var response = await _orderService.GetAllOrdersAsync(customerId);
             return StatusCode(response.Status, response);
         }
-
-
-
 
         [HttpPost("ConfirmDesign-for-printing")]
         public async Task<IActionResult> ConfirmDesignForPrintingAsync([FromBody] Request_CreatePrintJob request)
@@ -444,7 +469,7 @@ namespace Print_Management.Controllers
             }
         }
 
-        [HttpPost("CreateResource-property-detail")]
+        [HttpPost("ResourcePropertyDetail")]
         public async Task<IActionResult> CreateResourcePropertyDetail([FromBody] Request_CreateResourcePropertyDetail request)
         {
             if (!ModelState.IsValid)
@@ -462,7 +487,7 @@ namespace Print_Management.Controllers
             return StatusCode(response.Status, response.Message);
         }
 
-        [HttpGet("GetAllResourcePropertyDetails")]
+        [HttpGet("ResourcePropertyDetail")]
         public async Task<ActionResult<ResponseObject<List<DataResponseResourcePropertyDetail>>>> GetAllResourcePropertyDetailsAsync()
         {
             try

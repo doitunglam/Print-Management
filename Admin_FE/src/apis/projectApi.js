@@ -167,7 +167,7 @@ export const createResourceProperty = async (propertyData) => {
 export const createResourcePropertyDetail = async (detailData) => {
   try {
     const response = await axiosInstance.post(
-      "/Project/CreateResource-property-detail",
+      "/Project/ResourcePropertyDetail",
       detailData
     );
     return response.data;
@@ -180,7 +180,7 @@ export const createResourcePropertyDetail = async (detailData) => {
 export const getAllResourcePropertyDetails = async () => {
   try {
     const response = await axiosInstance.get(
-      "/Project/GetAllResourcePropertyDetails"
+      "/Project/ResourcePropertyDetail"
     );
     return response.data.data; // Assuming the API response has a "data" field
   } catch (error) {

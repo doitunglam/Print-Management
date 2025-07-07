@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Org.BouncyCastle.Asn1.Ocsp;
 using PM.Application.Payloads.RequestModels.ProjectRequests;
 using PM.Application.Payloads.ResponseModels.DataProjects;
@@ -42,6 +43,41 @@ public class ProductService : IProductService
         };
 
         return new ResponseObject<DataResponseProduct> { Data = response, Message = "Product created successfully" };
+    }
+
+    public async Task<ResponseObject<Product>> DeleteProductAsync(long productId)
+    {
+        try
+        {
+            var project = await _productRepository.GetByIdAsync(productId);
+            if (project == null)
+            {
+                return new ResponseObject<Product>
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Message = "Project not found.",
+                    Data = null
+                };    
+            };
+    
+            await _productRepository.DeleteAsync(productId);
+
+            return new ResponseObject<Product>
+            {
+                Status = StatusCodes.Status200OK,
+                Message = "Project is deleted successfully.",
+                Data = null
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseObject<Product>
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Message = ex.Message,
+                Data = null
+            };
+        }
     }
 
     public async Task<ResponseObject<List<DataResponseProduct>>> GetAllProductsAsync()
@@ -100,9 +136,6 @@ public class ProductService : IProductService
             };
         }
     }
-
-
-
     public async Task<ResponseObject<DataResponseProduct>> GetProductByIdAsync(long id)
     {
         try
@@ -144,6 +177,46 @@ public class ProductService : IProductService
         catch (Exception ex)
         {
             return new ResponseObject<DataResponseProduct>
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Message = ex.Message,
+                Data = null
+            };
+        }
+    }
+
+    public async Task<ResponseObject<Product>> UpdateProductAsync(long productId, Request_CreateProduct request)
+    {
+        try
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+            {
+                return new ResponseObject<Product>
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Message = "Project not found.",
+                    Data = null
+                };
+            }
+            product.Name = request.Name;
+            product.Description = request.Description;
+            product.Price = request.Price;
+            product.ImageUrl = request.ImageUrl;
+            product.UpdatedAt = DateTime.Now;
+
+            await _productRepository.UpdateAsync(product);
+
+            return new ResponseObject<Product>
+            {
+                Status = StatusCodes.Status200OK,
+                Message = "Project is updated successfully.",
+                Data = product
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ResponseObject<Product>
             {
                 Status = StatusCodes.Status500InternalServerError,
                 Message = ex.Message,

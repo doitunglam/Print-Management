@@ -23,7 +23,7 @@ export const getAllResourceProperties = async () => {
   // New API for creating resource property detail
   export const createResourcePropertyDetail = async (detailData) => {
     try {
-      const response = await axiosInstance.post('/Project/CreateResource-property-detail', detailData);
+      const response = await axiosInstance.post('/Project/ResourcePropertyDetail', detailData);
       return response.data;
     } catch (error) {
       console.error('Error creating resource property detail:', error);
@@ -33,7 +33,7 @@ export const getAllResourceProperties = async () => {
 
   export const getAllResourcePropertyDetails = async () => {
     try {
-        const response = await axiosInstance.get('/Project/GetAllResourcePropertyDetails');
+        const response = await axiosInstance.get('/Project/ResourcePropertyDetail');
         return response.data.data;
     } catch (error) {
         console.error('Error getting all resource property details:', error);

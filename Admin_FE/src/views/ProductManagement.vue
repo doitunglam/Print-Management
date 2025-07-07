@@ -7,71 +7,36 @@
     <div class="actions-bar">
       <a-button type="primary" @click="showCreateModal">Thêm sản phẩm</a-button>
     </div>
-    <a-table
-      :columns="columns"
-      :dataSource="products"
-      :pagination="{ pageSize: 10 }"
-      rowKey="id"
-    >
+    <a-table :columns="columns" :dataSource="products" :pagination="{ pageSize: 10 }" rowKey="id">
       <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'imageUrl'">
           <img :src="record.imageUrl" alt="" class="product-image" />
+        </span>
+        <span v-else-if="column.key === 'actions'">
+          <a @click="showEditModal(record)">Sửa</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="Bạn có chắc chắn muốn xóa sản phẩm này không?" ok-text="Có" cancel-text="Không"
+            @confirm="handleDelete(record.id)">
+            <a>Xóa</a>
+          </a-popconfirm>
         </span>
         <span v-else>{{ record[column.dataIndex] || "-" }}</span>
       </template>
     </a-table>
 
     <!-- Add Product Modal -->
-    <a-modal
-      v-model:visible="isModalVisible"
-      title="Thêm sản phẩm"
-      @ok="submitProduct"
-      @cancel="handleCancel"
-    >
-      <a-form
-        :model="newProduct"
-        :rules="rules"
-        ref="productForm"
-        layout="vertical"
-      >
-        <a-form-item
-          label="Tên sản phẩm"
-          name="name"
-          style="margin-bottom: 10px"
-        >
-          <a-input
-            v-model:value="newProduct.name"
-            placeholder="Nhập tên sản phẩm"
-            required
-          />
+    <a-modal v-model:visible="isModalVisible" title="Thêm sản phẩm" @ok="submitProduct" @cancel="handleCancel">
+      <a-form :model="newProduct" :rules="rules" ref="productForm" layout="vertical">
+        <a-form-item label="Tên sản phẩm" name="name" style="margin-bottom: 10px">
+          <a-input v-model:value="newProduct.name" placeholder="Nhập tên sản phẩm" required />
         </a-form-item>
-        <a-form-item
-          label="Mô tả sản phẩm"
-          name="description"
-          style="margin-bottom: 10px"
-        >
-          <a-input
-            v-model:value="newProduct.description"
-            placeholder="Nhập mô tả sản phẩm"
-            required
-          />
+        <a-form-item label="Mô tả sản phẩm" name="description" style="margin-bottom: 10px">
+          <a-input v-model:value="newProduct.description" placeholder="Nhập mô tả sản phẩm" required />
         </a-form-item>
-        <a-form-item
-          label="Giá sản phẩm"
-          name="price"
-          style="margin-bottom: 10px"
-        >
-          <a-input
-            v-model:value="newProduct.price"
-            placeholder="Nhập giá sản phẩm"
-            required
-          />
+        <a-form-item label="Giá sản phẩm" name="price" style="margin-bottom: 10px">
+          <a-input v-model:value="newProduct.price" placeholder="Nhập giá sản phẩm" required />
         </a-form-item>
-        <a-form-item
-          label="Ảnh sản phẩm"
-          name="imageUrl"
-          style="margin-bottom: 10px"
-        >
+        <a-form-item label="Ảnh sản phẩm" name="imageUrl" style="margin-bottom: 10px">
           <a-upload :before-upload="handleFileUpload" :show-upload-list="false">
             <a-button icon="upload">Nhấn để Tải lên</a-button>
           </a-upload>
@@ -82,7 +47,7 @@
 </template>
 
 <script>
-import { getAllProducts, addProduct } from "@/apis/productApi"
+import { getAllProducts, addProduct, updateProduct, deleteProduct } from "@/apis/productApi"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { storage } from "@/firebaseConfig"
 import { message } from "ant-design-vue"
@@ -92,6 +57,7 @@ export default {
   data() {
     return {
       products: [],
+      productForm: {},
       newProduct: {
         name: "",
         description: "",
@@ -108,6 +74,7 @@ export default {
           title: "Mô tả sản phẩm",
           dataIndex: "description",
           key: "description",
+          width: "500px"
         },
         {
           title: "Hình ảnh sản phẩm",
@@ -123,6 +90,11 @@ export default {
           title: "Thời gian tạo",
           dataIndex: "createdAt",
           key: "createdAt",
+        },
+        {
+          title: "Hành động",
+          dataIndex: "actions",
+          key: "actions",
         },
       ],
       isModalVisible: false,
@@ -169,9 +141,18 @@ export default {
         .then(async () => {
           try {
             console.log("Submitting product:", this.newProduct)
-            await addProduct(this.newProduct)
-            this.fetchProducts()
-            this.isModalVisible = false
+            if (this.isEditing == false) {
+              await addProduct(this.newProduct)
+              this.fetchProducts()
+              this.isModalVisible = false
+              message.success('Thêm sản phẩm thành công!');
+            } else {
+              await updateProduct(this.newProduct.id, this.newProduct)
+              this.fetchProducts()
+              this.isModalVisible = false
+              message.success('Cập nhật sản phẩm thành công!');
+            }
+
           } catch (error) {
             console.error("Lỗi khi thêm sản phẩm:", error)
           }
@@ -189,8 +170,24 @@ export default {
         imageUrl: "",
       }
     },
+    showEditModal(record) {
+      this.isEditing = true;
+      this.newProduct = {
+        ...record
+      };
+      this.isModalVisible = true;
+    },
     handleCancel() {
       this.isModalVisible = false
+    },
+    async handleDelete(id) {
+      try {
+        await deleteProduct(id);
+        message.success('Xóa sản phẩm thành công!');
+        this.fetchProducts();
+      } catch (error) {
+        message.error('Có lỗi xảy ra!');
+      }
     },
   },
   mounted() {
@@ -205,6 +202,7 @@ export default {
   justify-content: space-between;
   margin-bottom: 16px;
 }
+
 .product-image {
   height: 100px;
   width: auto;

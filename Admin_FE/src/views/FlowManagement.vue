@@ -33,7 +33,7 @@
             <span v-if="column.key == 'productName'">
               {{ products.find((product) => product.id == record.productId)?.name }}
             </span>
-            <span v-if="column.key === 'actions'">
+            <span v-else-if="column.key === 'actions'">
               <a @click="showEditFlowTemplate(record)">Sửa</a>
               <a-divider type="vertical" />
               <a-popconfirm title="Bạn có chắc chắn muốn xóa bước xử lý này không?" ok-text="Có" cancel-text="Không"

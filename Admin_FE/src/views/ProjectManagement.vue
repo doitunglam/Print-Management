@@ -11,7 +11,7 @@
       <template #bodyCell="{ column, record }">
         <span v-if="column.key === 'actions'">
           <a @click="showEditModal(record)" v-if="checkPermission('Project') > 0">Sửa</a>
-          <!-- <a-divider type="vertical" />
+          <a-divider type="vertical" />
           <a-popconfirm
             title="Bạn có chắc chắn muốn xóa dự án này không?"
             ok-text="Có"
@@ -19,7 +19,7 @@
             @confirm="handleDelete(record.id)"
           >
             <a>Xóa</a>
-          </a-popconfirm> -->
+          </a-popconfirm>
         </span>
         <span v-else-if="column.key === 'employeeName'">
           {{users.findLast(user => user.id == record.employeeId)?.fullName ?? '-'}}
@@ -251,7 +251,7 @@ export default {
         message.success('Xóa dự án thành công!');
         this.fetchProjects();
       } catch (error) {
-        message.error(error.message || 'Có lỗi xảy ra!');
+        message.error('Có lỗi xảy ra! Vui lòng xóa hết các tài nguyên liên quan và thử lại.');
       }
     },
     mounted() {
