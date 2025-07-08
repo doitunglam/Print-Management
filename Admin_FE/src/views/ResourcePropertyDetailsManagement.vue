@@ -79,7 +79,7 @@
 
 <script>
 import { getAllResourcePropertyDetails, usingResourceForPrintJob, getAllPrintJobs } from '@/apis/projectApi';
-import { createResourcePropertyDetail } from '@/apis/resourcePropertyApi'; // Import the new API
+import { createResourcePropertyDetail, updateResourcePropertyDetails, deleteResourcePropertyDetails } from '@/apis/resourcePropertyApi'; // Import the new API
 import { message } from 'ant-design-vue';
 import { getAllResources } from "@/apis/projectApi"
 import {
@@ -221,11 +221,19 @@ export default {
             price: this.detailFormData.price,
             quantity: this.detailFormData.quantity,
           };
-          await createResourcePropertyDetail(payload);
-          message.success('Thêm chi tiết thuộc tính thành công!');
+          if (this.isEditing == false) {
+            await createResourcePropertyDetail(payload);
+            message.success('Thêm chi tiết thuộc tính thành công!');
+          } else {
+            await updateResourcePropertyDetails(payload.propertyId, payload);
+            message.success( 'Sửa chi tiết thuộc tính thành công!');
+          }
+          this.fetchResourcePropertyDetails();
           this.isDetailModalVisible = false;
         } catch (error) {
           message.error(error.message || 'Có lỗi xảy ra khi thêm chi tiết thuộc tính!');
+        } finally {
+          this.isEditing = false;
         }
       }).catch(() => {
         message.error('Vui lòng điền đầy đủ thông tin!');
@@ -279,6 +287,15 @@ export default {
         ...record
       };
       this.isDetailModalVisible = true;
+    },
+    async handleDelete(id) {
+      try {
+        await deleteResourcePropertyDetails(id);
+        message.success('Xóa chi tiết tài nguyên thành công!');
+        this.fetchResourcePropertyDetails();
+      } catch (error) {
+        message.error('Có lỗi xảy ra! Vui lòng xóa hết các tài nguyên liên quan và thử lại.');
+      }
     },
   },
 };

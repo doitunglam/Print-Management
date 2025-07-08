@@ -152,9 +152,10 @@ export default {
               this.isModalVisible = false
               message.success('Cập nhật sản phẩm thành công!');
             }
-
           } catch (error) {
             console.error("Lỗi khi thêm sản phẩm:", error)
+          } finally {
+            this.isEditing = false;
           }
         })
         .catch(() => {

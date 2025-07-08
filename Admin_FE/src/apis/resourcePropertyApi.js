@@ -40,3 +40,28 @@ export const getAllResourceProperties = async () => {
         throw error;
     }
 };
+
+export const updateResourcePropertyDetails = async (entityId, data) => {
+  try {
+    const response = await axiosInstance.put(
+      `/Project/ResourcePropertyDetail/${entityId}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating resource property detail:", error);
+    throw error;
+  }
+};
+
+export const deleteResourcePropertyDetails = async (entityId) => {
+  try {
+    const response = await axiosInstance.delete(
+      `/Project/ResourcePropertyDetail/${entityId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting resource property detail:", error);
+    throw error;
+  }
+};
