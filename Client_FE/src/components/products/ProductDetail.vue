@@ -75,7 +75,13 @@ const selectProductToApplyDesign = (product: ProductType) => {
           <hr class="my-6 border-gray-300" />
 
           <div>
-            <h3 class="text-lg font-bold text-gray-800">Sizes</h3>
+            <h3 class="text-lg font-bold text-gray-800">Số lượng</h3>
+            <a-input-number id="inputNumber" :min="1" :max="10" :value="1"/>  
+          </div>
+          <hr class="my-6 border-gray-300" />
+
+          <div>
+            <h3 class="text-lg font-bold text-gray-800">Kích thước</h3>
             <div class="flex flex-wrap gap-4 mt-4">
               <button type="button"
                 class="w-10 h-9 border border-gray-300 hover:border-purple-600 text-gray-800 text-sm flex items-center justify-center shrink-0">

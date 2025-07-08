@@ -77,6 +77,11 @@ export default {
             route: "/resource-property-details",
           },
           { key: "14", label: "Danh sách khách hàng", route: "/customer" },
+          {
+            key: "16",
+            label: "Quản lý đơn hàng",
+            route: "/order-management",
+          },
         ],
         Designer: [
           { key: "11", label: "Quản lý thiết kế", route: "/design-management" },
